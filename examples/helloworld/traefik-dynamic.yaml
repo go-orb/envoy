@@ -1,0 +1,12 @@
+## Dynamic configuration
+http:
+  routers:
+    to-helloworld:
+      rule: "PathPrefix(`/`)"
+      service: helloworld
+
+  services:
+    helloworld:
+      loadBalancer:
+        servers:
+          - url: "http://helloworld:10000"

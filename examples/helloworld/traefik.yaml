@@ -1,0 +1,7 @@
+entryPoints:
+  hole-1:
+    address: ":10000"
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yaml

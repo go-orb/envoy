@@ -1,0 +1,71 @@
+services:
+  nats:
+    image: docker.io/library/nats:2.11-scratch
+    command: ["-js"]
+    volumes:
+      - nats:/data
+
+  helloworld:
+    build:
+      context: ./service/helloworld
+      dockerfile: ./Dockerfile
+    # command: ["--log-level", "TRACE"]
+    scale: 8
+    environment:
+      GOMAXPROCS: 1
+    depends_on:
+      nats:
+        condition: service_started
+
+  traefik:
+    image: docker.io/library/traefik:v3.3.5
+    command: ["-f", "/etc/traefik/traefik.yaml"]
+    volumes:
+      - ./traefik.yaml:/etc/traefik/traefik.yaml
+      - ./traefik-dynamic.yaml:/etc/traefik/dynamic.yaml
+
+  envoy:
+    build:
+      context: ../../
+      dockerfile: ./Dockerfile
+    command: ["-c", "/etc/envoy/envoy.yaml"]
+    ports:
+      - "10000:10000"
+    depends_on:
+      nats:
+        condition: service_started
+      helloworld:
+        condition: service_started
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
+
+  envoy2:
+    build:
+      context: ../../
+      dockerfile: ./Dockerfile
+    command: ["-c", "/etc/envoy/envoy.yaml"]
+    depends_on:
+      nats:
+        condition: service_started
+      helloworld:
+        condition: service_started
+    volumes:
+      - ./envoy2.yaml:/etc/envoy/envoy.yaml
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
+
+  fortio:
+    image: docker.io/fortio/fortio:1.69.0
+    profiles:
+      - tools
+
+volumes:
+  nats:

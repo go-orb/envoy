@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hello.v1;
+
+option go_package = "./hello;hello_v1";
+
+import "google/protobuf/empty.proto";
+
+service Hello {
+  rpc Hello(google.protobuf.Empty) returns (HelloResponse);
+}
+
+message HelloResponse { 
+  string message = 1;
+}
