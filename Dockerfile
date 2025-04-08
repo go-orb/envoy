@@ -9,5 +9,6 @@ RUN --mount=type=cache,target=$HOME/go \
     cd orbproxy; go build -o ../dist/orbproxy.so -buildmode=c-shared .
 
 FROM envoyproxy/envoy:contrib-v1.33.2
+#FROM envoyproxy/envoy-contrib-dev:6155aaddb2ab3c8869090845fc844c7c0878c0d2
 
 COPY --from=golang-orbproxy-builder /lib/dist/orbproxy.so /lib/orbproxy.so

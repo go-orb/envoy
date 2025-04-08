@@ -153,6 +153,7 @@ func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.
 
 	if endStream {
 		// If the request is empty, request with empty JSON object
+		api.LogDebug("Request is empty, sending empty JSON object")
 		go f.request([]byte("{}"))
 
 		return api.Running
