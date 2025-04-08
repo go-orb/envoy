@@ -63,6 +63,8 @@ func (h *Handler) Handle(_ context.Context, r slog.Record) error {
 		api.LogInfo(state.buf.String())
 	case slog.LevelDebug:
 		api.LogDebug(state.buf.String())
+	default:
+		api.LogDebug(state.buf.String())
 	}
 
 	return nil
