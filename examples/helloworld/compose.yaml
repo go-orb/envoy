@@ -10,9 +10,9 @@ services:
       context: ./service/helloworld
       dockerfile: ./Dockerfile
     # command: ["--log-level", "TRACE"]
-    scale: 8
+    scale: 1
     environment:
-      GOMAXPROCS: 1
+      GOMAXPROCS: 4
     depends_on:
       nats:
         condition: service_started
@@ -28,7 +28,7 @@ services:
     build:
       context: ../../
       dockerfile: ./Dockerfile
-    command: ["-c", "/etc/envoy/envoy.yaml"]
+    command: ["-c", "/etc/envoy/envoy.yaml", "-l", "debug"]
     ports:
       - "10000:10000"
     depends_on:

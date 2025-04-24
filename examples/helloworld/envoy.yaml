@@ -26,8 +26,8 @@ static_resources:
               plugin_config:
                 "@type": type.googleapis.com/xds.type.v3.TypedStruct
                 value:
-                  service: "none"
-                  endpoint: "/none.v1.None/None"
+                  service: ""
+                  endpoint: ""
                   stream: false
                   config: '{"logger": {"level": "trace"}, "client": {"poolSize": 256, "poolHosts": 32, "middlewares": [{"name": "retry"}, {"name": "log"}]}, "registry": {"plugin": "kvstore", "kvstore": {"plugin": "natsjs", "servers": ["nats://nats:4222"]}}}'
           - name: envoy.filters.http.router
@@ -43,10 +43,7 @@ static_resources:
               routes:
               - match:
                   prefix: "/hello.v1.Hello/Hello"
-                direct_response:
-                  status: 200
-                  body:
-                    inline_string: "This is a direct response from envoy"
+                non_forwarding_action: {}
                 typed_per_filter_config:
                   envoy.filters.http.golang:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.golang.v3alpha.ConfigsPerRoute

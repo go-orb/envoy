@@ -103,6 +103,8 @@ func (f *filter) request(reqBytes []byte) {
 		contentType = codecs.MimeJSON
 	}
 
+	api.LogDebugf("Requesting %s%s", f.config.service, f.config.endpoint)
+
 	bPointer, err := client.Request[[]byte](
 		context.Background(),
 		globalClient,
@@ -116,6 +118,7 @@ func (f *filter) request(reqBytes []byte) {
 
 	if err != nil {
 		f.responseError = orberrors.From(err)
+		api.LogError(f.responseError.Error())
 		f.callbacks.DecoderFilterCallbacks().Continue(api.Continue)
 		return
 	}
@@ -138,6 +141,8 @@ func (f *filter) request(reqBytes []byte) {
 // Callbacks which are called in request path
 // The endStream is true if the request doesn't have body
 func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.StatusType {
+	api.LogDebug("Decoding headers")
+
 	// Copy the headers from the request.
 	if len(f.requestHeaders) == 0 {
 		header.RangeWithCopy(func(key, value string) bool {
@@ -153,7 +158,7 @@ func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.
 
 	if endStream {
 		// If the request is empty, request with empty JSON object
-		api.LogDebug("Request is empty, sending empty JSON object")
+		api.LogDebug("Request is empty, requesting empty JSON object")
 		go f.request([]byte("{}"))
 
 		return api.Running
@@ -165,6 +170,8 @@ func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.
 // DecodeData might be called multiple times during handling the request body.
 // The endStream is true when handling the last piece of the body.
 func (f *filter) DecodeData(buffer api.BufferInstance, endStream bool) api.StatusType {
+	api.LogDebug("Decoding data")
+
 	go f.request(buffer.Bytes())
 
 	return api.Running
@@ -173,6 +180,8 @@ func (f *filter) DecodeData(buffer api.BufferInstance, endStream bool) api.Statu
 // Callbacks which are called in response path
 // The endStream is true if the response doesn't have body
 func (f *filter) EncodeHeaders(header api.ResponseHeaderMap, endStream bool) api.StatusType {
+	api.LogDebug("Encoding headers")
+
 	if f.responseError != nil {
 		api.LogError(f.responseError.Error())
 
@@ -197,6 +206,8 @@ func (f *filter) EncodeHeaders(header api.ResponseHeaderMap, endStream bool) api
 // EncodeData might be called multiple times during handling the response body.
 // The endStream is true when handling the last piece of the body.
 func (f *filter) EncodeData(buffer api.BufferInstance, endStream bool) api.StatusType {
+	api.LogDebugf("Encoding data, responseError: %v, endStream: %v, responseBody: %v", f.responseError != nil, endStream, string(f.responseBody))
+
 	if f.responseError != nil {
 		return api.Continue
 	}
